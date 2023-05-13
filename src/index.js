@@ -3,6 +3,7 @@ const http = require('http')
 const express = require('express');
 const socketio = require('socket.io');
 const app = express();
+const {generateMessage, generateLocationMessage} = require('./utils/messages');
 
 const server = http.createServer(app);
 const io = socketio(server);
@@ -16,21 +17,21 @@ io.on('connection', (socket)=>{
     console.log('New websocket connection');
 
 
-    socket.emit('message','welcome!');
-    socket.broadcast.emit('message', 'A new user has joined');
+    socket.emit('message', generateMessage('Welcome!'));
+    socket.broadcast.emit('message', generateMessage('A new user has joined'));
 
     socket.on('sendMessage', (msg, callback)=>{
-        io.emit('message',msg);
+        io.emit('message',generateMessage(msg));
         callback()
     })
 
     socket.on('disconnect', ()=>{
-        io.emit('message', 'A user has left');
+        io.emit('message', generateMessage('A user has left'));
     })
 
     socket.on('sendLocation', (coordinates, callback)=>{
         gmaps_url = `https://google.com/maps?q=${coordinates.lat},${coordinates.long}`
-        io.emit('message', gmaps_url);
+        io.emit('locationMessage', generateLocationMessage(gmaps_url));
         callback();
     })
 })
