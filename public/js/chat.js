@@ -22,8 +22,9 @@ const {username, room} = Qs.parse(location.search, {ignoreQueryPrefix: true});
 const autoscroll = () =>{
     // New message element
     const $newMessage = $messages.lastElementChild;
-    //height of the last new message
+    //height of the new message
     const newMessageStyles = getComputedStyle($newMessage);
+    console.log(newMessageStyles);
     const newMessageMargin = parseInt(newMessageStyles.marginBottom);
     const newMessageHeight = $newMessage.offsetHeight + newMessageMargin;
     //visible height
@@ -31,8 +32,13 @@ const autoscroll = () =>{
     //Height of messages container
     const containerHeight = $messages.scrollHeight;
     //How far have I scrolled?
-    const scrollOffset = $messages.scrollTop
-    console.log(newMessageStyles);
+    const scrollOffset = $messages.scrollTop + visibleHeight;
+
+    if(containerHeight - newMessageHeight < scrollOffset){
+        $messages.scrollTop = $messages.scrollHeight;
+    }
+
+    console.log(newMessageMargin);
 
 }
 
@@ -44,6 +50,7 @@ socket.on('message', (msg)=>{
         createdAt: moment(msg.createdAt).format('h:mm a')
     });
     $messages.insertAdjacentHTML('beforeend', html);
+    autoscroll();
 })
 
 socket.on('locationMessage', (loc_msg)=>{
@@ -54,6 +61,7 @@ socket.on('locationMessage', (loc_msg)=>{
         createdAt : moment(loc_msg.createdAt).format('h:mm a')
     });
     $messages.insertAdjacentHTML('beforeend', html);
+    autoscroll();
 })
 
 $messageForm.addEventListener('submit', (e)=>{
